@@ -4,43 +4,109 @@ The fundamental purpose is the achievement of going from the initial level to th
 ## Table of Contents
 
 - [Project Structure](#project-structure)
-- [Requirements](#requirements)
-- [Instalación](#instalación)
-- [Usage](#usage)
-  - [Ejecución Local](#ejecución-local)
-  - [Uso del Servicio REST](#uso-del-servicio-rest)
-- [Example](#example)
+- [Gaming Considerations](#gaming-considerations)
+- [Examples](#examples)
 - [Conclusion](#conclusion)
-- [Developed](#developed)
+- [Authors](#authors)
 
 ## Project Structure
 The Automated RPG Adventure Planning system is organized around the principles of automated planning. The project structure consists of two fundamental components: the domain and the problems:
 
 ### 1. Domain
-- **domain.pddl**: Defines the general rules of the world in which the planning takes place, as well as the actions that the characters can perform. This includes the definition of:
-- 
-- **problems.pddl**: Analizador léxico que tokeniza el código ensamblador.
-
-  ### 1. Domain
 
 The **domain** describes the general rules and dynamics of the RPG world. It defines what actions characters can take and how those actions affect the state of the world. The main elements of the domain include:
 
-- **actions**: These are operations that characters (or NPCs) can perform within the game, such as moving from one location to another, interacting with objects, or facing enemies. The actions are as follows:
-- **move**: Un personaje se desplaza de una ubicación a otra.
+- **actions**: These are operations that characters can perform within the game, such as moving from one location to another, interacting with objects, or facing enemies. The actions are as follows:
+  - **move**: This action allows the player to move only to an empty level or a level with a trap.
+  - **move-equipped-with-weapon**: This action allows the player to move only to an empty level or with a beast.
+  - **move-equipped-with-spell**: This action allows the player to move to a level with a dragon, empty or with a trap.
+  - **disarm_trap**: This action allows a player to disarm a trap.
+  - **pickup_weapon / pickup_spell**: These actions allow the player to equip himself with a weapon/spell.
+  - **destroy_weapon / destroy_spell**: These actions allow the player to destroy a weapon/spell.
   
-- **Predicados**: Descripciones del estado del mundo que se utilizan para evaluar las condiciones de las acciones, como si un personaje se encuentra en una ubicación o si posee un objeto.
-- **Objetos y personajes**: Entidades que existen en el entorno y que son relevantes para la planificación, como personajes, lugares o ítems.
+### 2. Problems
 
-### 2. Problemas
+The **problems** are concrete instances of the domain that pose specific scenarios that the player must solve. Examples of problems are shown below:
 
-Los **problemas** son instancias específicas del dominio, en las cuales se definen:
-- **Estado inicial**: La configuración inicial del mundo, es decir, la posición de los personajes, objetos y otros elementos del entorno antes de iniciar la planificación.
-- **Objetivo**: El estado que se desea alcanzar. El planificador generará una secuencia de acciones que transformen el estado inicial en el estado objetivo.
-- **Recursos y restricciones (opcional)**: En algunos casos, pueden añadirse limitaciones adicionales como tiempo, energía o inventario, para agregar más complejidad a la planificación.
+- ### Problem 1
+  - In this problem, the player must move from level `level1_1` to level `level4_1`, collecting weapons and spells, and facing enemies through a sequence of actions.
 
-### Ejemplo de Estructura
+- ### Problem 2
+  - In this case, the player starts at level `level1_2` and must reach level `level4_4`, avoiding traps and using spells to advance strategically.
+ 
+## Gaming Considerations
+In the RPG world, the player must advance through several levels facing different challenges. The following are the rules that govern this system:
 
-- **Dominio**: Definido en archivos que contienen la lógica y las reglas del mundo, como `domain.pddl` o `rpg_domain.py`.
-- **Problemas**: Instancias específicas de la planificación almacenadas en archivos de configuración, como `problem_1.pddl` o `rpg_problem_1.py`, que establecen los estados inicial y objetivo para cada aventura o misión.
+1. **Player Objective**:  
+   The player must move from the initial level to the final level.
 
-Esta estructura modular permite una fácil extensión del sistema, ya que se pueden agregar nuevas acciones al dominio o definir nuevos problemas para crear diferentes escenarios dentro del mundo RPG.
+2. **Elements in Each Level**:  
+   Each level may contain:
+   - A beast
+   - A dragon
+   - A trap
+   - A weapon
+   - A spell
+   - Or it can be empty
+
+3. **Trap Disarming**:  
+   The player can disarm traps, but **only** if he does not have a weapon equipped.
+
+4. **Equipment**:  
+   The player may equip himself with:
+   - A weapon
+   - A spell
+
+5. **Movement through Empty Levels**:  
+   The player can move through empty levels without the need to be equipped.
+
+6. **Level Destruction**:  
+   Once the player passes through a level, **that level is destroyed**.
+
+7. **Encounter Beasts**:  
+   The player can only pass through levels with beasts if equipped with a weapon.
+
+8. **Encounter Dragons**:  
+   The player can only go through levels with dragons if equipped with a spell.
+
+9. **World Structure**:  
+   The world or map is defined as a two-dimensional matrix.
+
+## Examples
+## Problem 1
+  The player must move from level `level1_1` to level `level4_1`
+  ![Problem 1](Imagenes/problema1.png)
+## Results
+To reach the final destination it was determined that this would be the best solution:
+```bash
+(move level1_1 level1_2)
+(pickup_weapon level1_2)
+(move-equipped-with-weapon level1_2 level2_2)
+(move-equipped-with-weapon level2_2 level2_3)
+(move-equipped-with-weapon level2_3 level3_3)
+(destroy_weapon level3_3)
+(pickup_spell level3_3)
+(move-equipped-with-spell level3_3 level3_2)
+(move-equipped-with-spell level3_2 level3_1)
+(move-equipped-with-spell level3_1 level4_1)
+ ```
+## Problem 2
+  The player starts at level `level1_2` and must reach level `level4_4`
+  ![Problem 2](Imagenes/problema2.png)
+## Results
+To reach the final destination it was determined that this would be the best solution:
+```bash
+(move level1_2 level1_1)
+(pickup_spell level1_1)
+(move-equipped-with-spell level1_1 level2_1)
+(move-equipped-with-spell level2_1 level3_1)
+(disarm_trap level3_1)
+(move-equipped-with-spell level3_1 level3_2)
+(move-equipped-with-spell level3_2 level3_3)
+(disarm_trap level3_3)
+(move-equipped-with-spell level3_3 level4_3)
+(move-equipped-with-spell level4_3 level4_4)
+ ```
+## Authors
+- 🧑‍💻 Marco Sanchez Escudero
+- 🧑‍💻 Jhovany QUintana Vera
